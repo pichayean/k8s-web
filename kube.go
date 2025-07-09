@@ -12,7 +12,11 @@ import (
 )
 
 func renderKubernetesOverview() (string, error) {
-	config, err := clientcmd.BuildConfigFromFlags("", clientcmd.RecommendedHomeFile)
+	// config, err := clientcmd.BuildConfigFromFlags("", clientcmd.RecommendedHomeFile)
+	// if err != nil {
+	// 	return "", fmt.Errorf("failed to load kubeconfig: %w", err)
+	// }
+	config, err := clientcmd.BuildConfigFromFlags("", "/root/.kube/config")
 	if err != nil {
 		return "", fmt.Errorf("failed to load kubeconfig: %w", err)
 	}
