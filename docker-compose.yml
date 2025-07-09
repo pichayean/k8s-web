@@ -7,6 +7,6 @@ services:
       - "4000:4000"
     volumes:
       - ./templates:/app/templates
-      - ~/.kube:/root/.kube  # เพื่อให้เข้าถึง kubeconfig ได้
+      - ~/.kube:/root/.kube:ro  # ใช้ kubeconfig host
     environment:
       - KUBECONFIG=/root/.kube/config
