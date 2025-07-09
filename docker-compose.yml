@@ -1,12 +1,11 @@
-version: "3.9"
-
+version: '3'
 services:
   k8s-web:
     build: .
     ports:
       - "4000:4000"
     volumes:
-      - ~/.kube:/root/.kube  # <--- mount kube config
-      - ~/.minikube:/root/.minikube  # <--- สำหรับ Minikube
+      - ~/.kube:/root/.kube:ro     # 👈 สำคัญมาก
+      - ~/.minikube:/root/.minikube:ro  # 👈 (กรณีใช้ minikube)
     environment:
       - KUBECONFIG=/root/.kube/config
