@@ -15,12 +15,19 @@ func main() {
 }
 
 func indexHandler(w http.ResponseWriter, r *http.Request) {
-	html, err := renderKubernetesOverview()
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	templates.ExecuteTemplate(w, "index.html", map[string]interface{}{
-		"HTML": template.HTML(html),
+	// html, err := renderKubernetesOverview()
+	// if err != nil {
+	// 	http.Error(w, err.Error(), http.StatusInternalServerError)
+	// 	return
+	// }
+	// templates.ExecuteTemplate(w, "index.html", map[string]interface{}{
+	// 	"HTML": template.HTML(html),
+	// })
+
+	html1, _ := renderKubernetesOverview()
+	html2, _ := renderDeploymentJSONTable()
+
+	templates.ExecuteTemplate(w, "index.html", map[string]any{
+		"HTML": template.HTML(html1 + "<hr>" + html2),
 	})
 }

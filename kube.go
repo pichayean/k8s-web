@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"strings"
+	"encoding/json"
 
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -103,4 +104,37 @@ func matchLabels(selector map[string]string, labels map[string]string) bool {
 		}
 	}
 	return true
+}
+
+
+func renderDeploymentJSONTable() (string, error) {
+	config, err := clientcmd.BuildConfigFromFlags("", "/root/.kube/config")
+	if err != nil {
+		return "", fmt.Errorf("load kubeconfig: %w", err)
+	}
+
+	clientset, err := kubernetes.NewForConfig(config)
+	if err != nil {
+		return "", fmt.Errorf("clientset: %w", err)
+	}
+
+	deployments, err := clientset.AppsV1().Deployments("default").List(context.TODO(), metav1.ListOptions{})
+	if err != nil {
+		return "", fmt.Errorf("list deployments: %w", err)
+	}
+
+	if len(deployments.Items) == 0 {
+		return "<p>No deployments found.</p>", nil
+	}
+
+	raw, err := json.MarshalIndent(deployments.Items[0], "", "  ")
+	if err != nil {
+		return "", fmt.Errorf("json marshal: %w", err)
+	}
+
+	// You could parse it as map[string]interface{} and make a table, but here we'll show raw JSON
+	html := `<h2>Deployment JSON Structure (First Item)</h2><pre style="background:#f0f0f0;padding:1em;">` +
+		string(raw) + "</pre>"
+
+	return html, nil
 }
