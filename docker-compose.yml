@@ -1,12 +1,10 @@
-version: "3.9"
-
 services:
   k8s-web:
     build: .
     ports:
       - "4000:4000"
     volumes:
-      - ./templates:/app/templates
-      - ~/.kube:/root/.kube:ro  # ใช้ kubeconfig host
+      - ~/.kube:/root/.kube:ro
+      - ~/.minikube:/root/.minikube:ro   # ✅ << เพิ่มบรรทัดนี้
     environment:
       - KUBECONFIG=/root/.kube/config
