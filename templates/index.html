@@ -1,4 +1,42 @@
-{{ define "content" }}
-<h1>Welcome to Kubernetes Dashboard</h1>
-<p>Select a section from the sidebar.</p>
-{{ end }}
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Kubernetes Overview</title>
+  <link href="https://cdn.jsdelivr.net/npm/simpledotcss/simple.min.css" rel="stylesheet">
+  <style>
+    table {
+      width: 100%;
+      margin-top: 1rem;
+    }
+    th, td {
+      text-align: left;
+    }
+    .badge {
+      display: inline-block;
+      padding: 0.2em 0.6em;
+      margin: 0 0.1em;
+      font-size: 0.85em;
+      background-color: #eef;
+      border-radius: 4px;
+    }
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+  </style>
+</head>
+<body>
+  <header class="header">
+    <h1>🔍 Kubernetes Deployment Overview</h1>
+    <small>Namespace: <strong>default</strong></small>
+  </header>
+
+  {{ if .HTML }}
+    {{ .HTML }}
+  {{ else }}
+    <p>No data available.</p>
+  {{ end }}
+</body>
+</html>
