@@ -1,0 +1,10 @@
+{{ define "content" }}
+<h2>Deployments</h2>
+<ul>
+{{ range . }}
+  <li><a href="/deployments/{{ .Name }}">{{ .Name }}</a></li>
+{{ else }}
+  <li>No deployments found.</li>
+{{ end }}
+</ul>
+{{ end }}

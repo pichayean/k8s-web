@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>K8s Web Dashboard</title>
+    <style>
+        body { font-family: monospace; background: #111; color: #fff; padding: 30px; }
+        h1 { color: #00ffcc; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        td, th { border: 1px solid #444; padding: 8px; }
+        th { background: #222; }
+    </style>
+</head>
+<body>
+    <h1>📦 Deployments</h1>
+    <table>
+        <tr><th>Name</th><th>Replicas</th></tr>
+        {{range .Deployments}}
+        <tr><td>{{.Name}}</td><td>{{.Replicas}}</td></tr>
+        {{end}}
+    </table>
+
+    <h1>🌐 Ingresses</h1>
+    <table>
+        <tr><th>Name</th><th>Host</th><th>Path</th></tr>
+        {{range .Ingresses}}
+        <tr><td>{{.Name}}</td><td>{{.Host}}</td><td>{{.Path}}</td></tr>
+        {{end}}
+    </table>
+</body>
+</html>

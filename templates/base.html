@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>K8s Dashboard</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <script type="module">
+      import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+      mermaid.initialize({ startOnLoad: true });
+    </script>
+</head>
+<body>
+    <div class="sidebar">
+        <ul>
+            <li><a href="/">🔹 Overview</a></li>
+            <li><a href="/deployments">📦 Deployments</a></li>
+            <li><a href="#">🛰️ Ingresses</a></li>
+            <li><a href="#">🚦 Services</a></li>
+            <li><a href="#">🧪 Pods</a></li>
+            <li><a href="#">🔐 Secrets</a></li>
+            <li><a href="#">⚙️ Nodes</a></li>
+            <li><a href="#">⏱️ CronJobs</a></li>
+            <li><a href="#">📋 Events</a></li>
+        </ul>
+    </div>
+    <div class="content">
+        {{ template "content" . }}
+    </div>
+</body>
+</html>

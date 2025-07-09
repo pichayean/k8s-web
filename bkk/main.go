@@ -26,4 +26,4 @@ func main() {
 
 func indexHandler(w http.ResponseWriter, r *http.Request) {
 	templates.ExecuteTemplate(w, "index.html", nil)
-}
+}  
