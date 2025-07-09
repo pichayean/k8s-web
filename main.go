@@ -12,8 +12,14 @@ import (
 var templates *template.Template
 
 func main() {
-    templates = template.Must(template.ParseGlob("templates/*.html"))
-
+    // templates = template.Must(template.ParseGlob("templates/*.html"))
+	templates = template.Must(template.ParseFiles(
+		"templates/base.html",
+		"templates/index.html",
+		"templates/deployments.html",
+		"templates/graph.html",
+	))
+	
     r := mux.NewRouter()
     r.PathPrefix("/static/").Handler(http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))
 
@@ -26,5 +32,9 @@ func main() {
 }
 
 func indexHandler(w http.ResponseWriter, r *http.Request) {
-    templates.ExecuteTemplate(w, "index.html", nil)
+    err := templates.ExecuteTemplate(w, "base.html", nil)
+    if err != nil {
+        log.Printf("Render failed: %v", err)
+        http.Error(w, err.Error(), http.StatusInternalServerError)
+    }
 }
