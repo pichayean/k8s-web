@@ -106,7 +106,6 @@ func matchLabels(selector map[string]string, labels map[string]string) bool {
 	return true
 }
 
-
 func renderDeploymentJSONTable() (string, error) {
 	config, err := clientcmd.BuildConfigFromFlags("", "/root/.kube/config")
 	if err != nil {
@@ -118,22 +117,69 @@ func renderDeploymentJSONTable() (string, error) {
 		return "", fmt.Errorf("clientset: %w", err)
 	}
 
-	deployments, err := clientset.AppsV1().Deployments("default").List(context.TODO(), metav1.ListOptions{})
+	ctx := context.TODO()
+	deployments, err := clientset.AppsV1().Deployments("default").List(ctx, metav1.ListOptions{})
 	if err != nil {
 		return "", fmt.Errorf("list deployments: %w", err)
 	}
 
-	if len(deployments.Items) == 0 {
-		return "<p>No deployments found.</p>", nil
+	services, _ := clientset.CoreV1().Services("default").List(ctx, metav1.ListOptions{})
+	ingresses, _ := clientset.NetworkingV1().Ingresses("default").List(ctx, metav1.ListOptions{})
+	pods, _ := clientset.CoreV1().Pods("default").List(ctx, metav1.ListOptions{})
+
+	var result []map[string]interface{}
+
+	for _, d := range deployments.Items {
+		item := map[string]interface{}{
+			"deployment": d,
+			"pods":       []corev1.Pod{},
+			"service":    nil,
+			"ingress":    nil,
+		}
+
+		// pods ที่ตรงกับ deployment
+		var matchedPods []corev1.Pod
+		for _, p := range pods.Items {
+			if matchLabels(d.Spec.Selector.MatchLabels, p.Labels) {
+				matchedPods = append(matchedPods, p)
+			}
+		}
+		item["pods"] = matchedPods
+
+		// service ที่ตรงกับ deployment
+		var serviceName string
+		for _, s := range services.Items {
+			if matchLabels(d.Spec.Selector.MatchLabels, s.Spec.Selector) {
+				item["service"] = s
+				serviceName = s.Name
+				break
+			}
+		}
+
+		// ingress ที่ใช้ service นี้
+		for _, i := range ingresses.Items {
+			for _, rule := range i.Spec.Rules {
+				if rule.HTTP == nil {
+					continue
+				}
+				for _, path := range rule.HTTP.Paths {
+					if path.Backend.Service != nil && path.Backend.Service.Name == serviceName {
+						item["ingress"] = i
+						break
+					}
+				}
+			}
+		}
+
+		result = append(result, item)
 	}
 
-	raw, err := json.MarshalIndent(deployments.Items[0], "", "  ")
+	raw, err := json.MarshalIndent(result, "", "  ")
 	if err != nil {
-		return "", fmt.Errorf("json marshal: %w", err)
+		return "", fmt.Errorf("marshal: %w", err)
 	}
 
-	// You could parse it as map[string]interface{} and make a table, but here we'll show raw JSON
-	html := `<h2>Deployment JSON Structure (First Item)</h2><pre style="background:#f0f0f0;padding:1em;">` +
+	html := `<h2>📦 Deployment + Resources (JSON)</h2><pre style="background:#f0f0f0;padding:1em;">` +
 		string(raw) + "</pre>"
 
 	return html, nil
