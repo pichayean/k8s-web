@@ -17,7 +17,7 @@ import (
 
 var graphTpl = template.Must(template.ParseFiles("templates/graph.html"))
 
-func deploymentGraphHandler(w http.ResponseWriter, r *http.Request) {
+func DeploymentGraphHandler(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	name := vars["name"]
 

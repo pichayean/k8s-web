@@ -11,7 +11,7 @@ import (
 
 var tpl = template.Must(template.ParseFiles("templates/deployments.html"))
 
-func deploymentsHandler(w http.ResponseWriter, r *http.Request) {
+func DeploymentsHandler(w http.ResponseWriter, r *http.Request) {
 	config, err := clientcmd.BuildConfigFromFlags("", clientcmd.RecommendedHomeFile)
 	if err != nil {
 		http.Error(w, "Failed to load kubeconfig", 500)
