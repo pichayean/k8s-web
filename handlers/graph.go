@@ -1,41 +1,22 @@
-package handlers
-
-import (
-	"context"
-	"fmt"
-	"net/http"
-	"text/template"
-
-	"github.com/gorilla/mux"
-	// appsv1 "k8s.io/api/apps/v1"
-	corev1 "k8s.io/api/core/v1"
-	netv1 "k8s.io/api/networking/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/client-go/kubernetes"
-	"k8s.io/client-go/tools/clientcmd"
-)
-
-var graphTpl = template.Must(template.ParseFiles("templates/graph.html"))
-
 func DeploymentGraphHandler(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	name := vars["name"]
 
 	config, err := clientcmd.BuildConfigFromFlags("", clientcmd.RecommendedHomeFile)
 	if err != nil {
-		http.Error(w, "Failed to load kubeconfig", 500)
+		http.Error(w, "Failed to load kubeconfig", http.StatusInternalServerError)
 		return
 	}
 	clientset, err := kubernetes.NewForConfig(config)
 	if err != nil {
-		http.Error(w, "Failed to connect to cluster", 500)
+		http.Error(w, "Failed to connect to cluster", http.StatusInternalServerError)
 		return
 	}
 
 	ctx := context.TODO()
 	d, err := clientset.AppsV1().Deployments("default").Get(ctx, name, metav1.GetOptions{})
 	if err != nil {
-		http.Error(w, "Deployment not found", 404)
+		http.Error(w, "Deployment not found", http.StatusNotFound)
 		return
 	}
 
@@ -56,11 +37,17 @@ func DeploymentGraphHandler(w http.ResponseWriter, r *http.Request) {
 	if matchedService != nil {
 		for _, i := range ingresses.Items {
 			for _, rule := range i.Spec.Rules {
+				if rule.HTTP == nil {
+					continue
+				}
 				for _, path := range rule.HTTP.Paths {
 					if path.Backend.Service != nil && path.Backend.Service.Name == matchedService.Name {
 						matchedIngress = &i
 						break
 					}
+				}
+				if matchedIngress != nil {
+					break
 				}
 			}
 			if matchedIngress != nil {
@@ -69,31 +56,26 @@ func DeploymentGraphHandler(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	// ⚠️ Mermaid syntax ต้องไม่มี indent + มี \n จริง
 	graph := "graph TD\n"
 	if matchedIngress != nil {
-		graph += fmt.Sprintf("  Ingress[\"Ingress: %s\"]\n", matchedIngress.Name)
-		graph += fmt.Sprintf("  Ingress --> Service\n")
+		graph += fmt.Sprintf("Ingress[\"Ingress: %s\"]\n", matchedIngress.Name)
+		graph += "Ingress --> Service\n"
 	}
 	if matchedService != nil {
-		graph += fmt.Sprintf("  Service[\"Service: %s\"]\n", matchedService.Name)
-		graph += fmt.Sprintf("  Service --> Deploy\n")
+		graph += fmt.Sprintf("Service[\"Service: %s\"]\n", matchedService.Name)
+		graph += "Service --> Deploy\n"
 	}
-	graph += fmt.Sprintf("  Deploy[\"Deployment: %s\"]\n", d.Name)
+	graph += fmt.Sprintf("Deploy[\"Deployment: %s\"]\n", d.Name)
 	for _, p := range pods.Items {
-		graph += fmt.Sprintf("  Deploy --> %s[\"Pod: %s\"]\n", p.Name, p.Name)
+		graph += fmt.Sprintf("Deploy --> %s[\"Pod: %s\"]\n", p.Name, p.Name)
 	}
 
-	graphTpl.Execute(w, map[string]string{
+	err = graphTpl.Execute(w, map[string]string{
 		"Graph": graph,
 		"Name":  name,
 	})
-}
-
-func matchLabels(selector map[string]string, labels map[string]string) bool {
-	for k, v := range selector {
-		if labels[k] != v {
-			return false
-		}
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
-	return true
 }

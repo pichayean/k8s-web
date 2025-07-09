@@ -6,7 +6,7 @@ services:
     ports:
       - "4000:4000"
     volumes:
-      - ~/.kube:/root/.kube:ro
-      - ~/.minikube:/root/.minikube:ro
+      - ~/.kube:/root/.kube  # <--- mount kube config
+      - ~/.minikube:/root/.minikube  # <--- สำหรับ Minikube
     environment:
       - KUBECONFIG=/root/.kube/config
