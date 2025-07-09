@@ -4,7 +4,6 @@ import (
 	"html/template"
 	"log"
 	"net/http"
-	"text/template"
 )
 
 var templates = template.Must(template.ParseFiles("templates/index.html"))
