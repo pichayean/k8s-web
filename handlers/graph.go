@@ -1,3 +1,22 @@
+package handlers
+
+import (
+	"context"
+	"fmt"
+	"net/http"
+	"text/template"
+
+	"github.com/gorilla/mux"
+	// appsv1 "k8s.io/api/apps/v1"
+	corev1 "k8s.io/api/core/v1"
+	netv1 "k8s.io/api/networking/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/client-go/kubernetes"
+	"k8s.io/client-go/tools/clientcmd"
+)
+
+var graphTpl = template.Must(template.ParseFiles("templates/graph.html"))
+
 func DeploymentGraphHandler(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	name := vars["name"]
@@ -78,4 +97,14 @@ func DeploymentGraphHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
+}
+
+
+func matchLabels(selector map[string]string, labels map[string]string) bool {
+	for k, v := range selector {
+		if labels[k] != v {
+			return false
+		}
+	}
+	return true
 }
