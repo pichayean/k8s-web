@@ -1,0 +1,12 @@
+version: "3.9"
+
+services:
+  k8s-web:
+    build: .
+    ports:
+      - "4000:4000"
+    volumes:
+      - ./templates:/app/templates
+      - ~/.kube:/root/.kube  # เพื่อให้เข้าถึง kubeconfig ได้
+    environment:
+      - KUBECONFIG=/root/.kube/config
