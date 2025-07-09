@@ -5,9 +5,7 @@ import (
 	"fmt"
 	"strings"
 
-	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
-	netv1 "k8s.io/api/networking/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/clientcmd"
@@ -46,7 +44,6 @@ func renderKubernetesOverview() (string, error) {
 <tbody>`)
 
 	for _, d := range deployments.Items {
-		selector := metav1.FormatLabelSelector(&metav1.LabelSelector{MatchLabels: d.Spec.Selector.MatchLabels})
 		var matchedPods []corev1.Pod
 		for _, p := range pods.Items {
 			if matchLabels(d.Spec.Selector.MatchLabels, p.Labels) {
