@@ -7,5 +7,7 @@ services:
     volumes:
       - ~/.kube:/root/.kube:ro     # 👈 สำคัญมาก
       - ~/.minikube:/root/.minikube:ro  # 👈 (กรณีใช้ minikube)
+      - ~/.kube:/root/.kube  # เพื่อให้เข้าถึง kubeconfig ได้
+      - ./templates:/app/templates
     environment:
       - KUBECONFIG=/root/.kube/config
